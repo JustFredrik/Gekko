@@ -1,5 +1,5 @@
 <p align="center"><img src="Gekko_logo.png" style="display:block; margin:auto; width:400px"></p>
-<h1 align="center">Gekko 0.1</h1>
+<h1 align="center">Gekko 0.0.1</h1>
 <h4 align="center">Modular User Interface System for GameMaker 2.3+</h4>
 <hr>
 <br>
