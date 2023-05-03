@@ -7,3 +7,15 @@ This page is currently under construction, feel free to check out Gekko if you w
 I'm currently building and fleshing out functionality :)
 
 You can <a href="https://github.com/JustFredrik/Gekko/releases"> download the .yymps</a> to get started
+
+Gekko currently supports the creation of components, nesting components, anchoring and automatically animating components with linear or spring forces. Additionally it supports setting callback methods on components for when certain events such as on_click and hover are triggered.
+
+<h4>Current Components</h4>
+<ul>
+  <dd>● Sprite</dd>
+  <dd>● Text</dd>
+  <dd>● List</dd>
+  <dd>● Wrapper</dd>
+</ul>
+
+If you are interested to learn more, ask questions or give feedback please join the <a href="https://discord.com/invite/47ap8cE"> Discord</a>! 
