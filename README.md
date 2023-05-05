@@ -42,8 +42,7 @@ If you are interested to learn more, ask questions or give feedback please join 
 <p align="justify">
   Gekko takes care of mouse hovering detection automatically, and it also provides the option to specify custom callbacks for events like clicking on a component. This makes it easy for developers to create interactive and responsive UI elements within their GameMaker projects.</p>
 <br>
-<hr>
-<br>
+<br><br>
 
 <img align="left" src="https://user-images.githubusercontent.com/54528582/236490560-87b23ec3-db91-4fd1-bc8d-b7802020d303.png" style="display:block; margin:auto; width:300px">
 <h2>Animated Properties</h2>
@@ -53,9 +52,8 @@ Gekko offers seamless animation support for component properties, simplifying th
 <p align="justify">
 Looking to create a responsive, bouncy button with a touch of 'juice'? Simply set the button's scale to increase upon triggering the hover event, and you'll have an engaging, interactive button with just a few lines of code!</p>
 <br>
-<hr>
 <br>
-<h2>Animated Properties</h2>
+<h2>License</h2>
 <p>This library is distributed under MIT license. I (Fredrik "JustFredrik" Svanholm) reserve the right to place future versions of this library under a different license.</p>
 
 
