@@ -52,6 +52,12 @@ Gekko offers seamless animation support for component properties, simplifying th
 
 <p align="justify">
 Looking to create a responsive, bouncy button with a touch of 'juice'? Simply set the button's scale to increase upon triggering the hover event, and you'll have an engaging, interactive button with just a few lines of code!</p>
+<br>
+<hr>
+<br>
+<h2>Animated Properties</h2>
+<p>This library is distributed under MIT license. I (Fredrik "JustFredrik" Svanholm) reserve the right to place future versions of this library under a different license.</p>
+
 
 
 
