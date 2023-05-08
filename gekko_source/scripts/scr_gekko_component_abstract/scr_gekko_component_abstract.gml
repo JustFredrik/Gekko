@@ -20,7 +20,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			tapable				= false;
 			scale				= 1;
 			color				= c_white;
-			property_spring_map= ds_map_create();
+			property_spring_map = ds_map_create();
 			property_bindings_map = ds_map_create();
 			custom_property_map = ds_map_create();
 	
@@ -254,6 +254,19 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				variable_struct_set(self.__, "velocity_" + _property_name, _val);
 			}
 				
+
+			///@ignore
+			static __tear_down_private_struct = function() {
+				var _names = variable_struct_get_names(__);
+				var _len = array_length(_names);
+				for(var _i = 0; _i < _len; _i++){
+					var _v = variable_struct_get(self.__, _names[_i]);
+					if ds_exists(_v, ds_type_map){
+						ds_map_destroy(_v);
+					}
+				}
+				delete __;
+			}
 		#endregion
 	#endregion
 	
@@ -279,6 +292,18 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				var _binding = __.property_bindings_map[? + _property_name].destroy();
 				ds_map_delete(__.property_bindings_map, _property_name);
 			}
+			return self;
+		}
+		static remove_all_property_bindings = function() {
+			var _names = get_property_bindings();
+			var _len = array_length(_names);
+			for(var _i = 0; _i < _len; _i++){
+				remove_property_binding(_names[_i]);
+			}
+			return self;
+		}
+		static get_property_bindings = function() {
+			return ds_map_keys_to_array(__.property_bindings_map);
 		}
 		static property_has_binding = function(_property_name){
 			return ds_map_exists(__.property_bindings_map, _property_name);
@@ -515,6 +540,12 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		}
 		static parent_exists = function() {
 			return gekko_component_exists(__.parent);
+		}
+		static destroy = function() {
+			remove_all_property_bindings();
+			remove_parent();
+			__gekko_tracking_remove_component(self);
+			__tear_down_private_struct();	
 		}
 		#endregion
 		
