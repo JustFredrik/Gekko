@@ -152,6 +152,28 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				return __get_child_anchor_x_vertical(_component_or_id);
 			}
 		}
+		static remove_child = function(_child_or_id) {
+			
+			// Remove from children
+			var _len = array_length(__.children);
+			for(var i = 0; i < _len; i++){
+				if gekko_component_is_equal(__.children[i], _child_or_id){
+					__.children[i].__.parent = noone;
+					array_delete(__.children, i, 1);
+					break
+				}
+			}
+			
+			// Remove from component array
+			var _len = array_length(__.component_array);
+			for(var i = 0; i < _len; i++) {
+				if gekko_component_is_equal(__.component_array[i], _child_or_id){
+					array_delete(__.component_array, i, 1);
+					return
+				}
+			}
+			//throw("Trying to remove a child that is not a child of parent component.");
+		}
 		#endregion
 		
 	#endregion

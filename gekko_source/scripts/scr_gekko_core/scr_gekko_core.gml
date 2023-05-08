@@ -59,24 +59,29 @@ Github	: https://github.com/JustFredrik/Gekko
 
 function gekko_update() {
 	var _m = __gekko_get_manager();	
-	var _keys = ds_map_keys_to_array(_m.componenet_map);
+	
+
+	var _keys = ds_map_keys_to_array(_m.component_map);
 	var _len = array_length(_keys);
 	
 	// Update Components
 	for(var _i = 0; _i < _len; _i++){
-		if not _m.componenet_map[? _i].has_parent() {
-			_m.componenet_map[? _i].update();
+		var _c = _m.component_map[? _keys[_i]];
+		if not _c.has_parent() {
+			_c.update();
 		}
 	}
 	
 	// Update Property Bindings 
 	__gekko_update_bindings();
+	
+	__gekko_go_through_destroy_array();
 }
 function gekko_get_component(_id) {
 	var __id = gekko_component_get_id(_id);
 	var _m = __gekko_get_manager();
-	if ds_map_exists(_m.componenet_map, __id){
-		return _m.componenet_map[? __id];
+	if ds_map_exists(_m.component_map, __id){
+		return _m.component_map[? __id];
 	}
 	return undefined;
 }
@@ -95,7 +100,7 @@ function gekko_draw() {
 function gekko_component_exists(_component_or_id) {
 	var _m = __gekko_get_manager();
 	var _id = gekko_component_get_id(_component_or_id);
-	return ds_map_exists(_m.componenet_map, _id);
+	return ds_map_exists(_m.component_map, _id);
 }
 function gekko_component_get_id(_component_or_id) {
 	if is_struct(_component_or_id) {
@@ -114,8 +119,8 @@ function gekko_component_get_y(_component_or_id) {
 }
 function gekko_component_delete_all() {
 	var _m = __gekko_get_manager();
-	ds_map_destroy(_m.componenet_map);
-	_m.componenet_map = ds_map_create();
+	ds_map_destroy(_m.component_map);
+	_m.component_map = ds_map_create();
 
 }
 function gekko_get_time_scale() {
@@ -164,7 +169,12 @@ function gekko_is_component(_struct){
 	if not is_struct(_struct) {return false}
 	return is_instanceof(_struct, GekkoComponentAbstract);
 }
-		
+function gekko_component_is_equal(_c1_or_id, _c2_or_id) {
+	var _c1 = gekko_get_component(_c1_or_id);
+	var _c2 = gekko_get_component(_c2_or_id);
+	return _c1.get_id() == _c2.get_id();
+}
+
 #endregion
 
 #region Anchor Functions ==========================================================================

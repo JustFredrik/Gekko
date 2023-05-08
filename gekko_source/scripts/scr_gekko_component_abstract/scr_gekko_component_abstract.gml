@@ -55,7 +55,11 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				update_all_children();
 				//update_scale();
 				update_animated_properties();
+				__component_special_update();
 			}	
+			
+			static __component_special_update = function() {
+			}
 			
 			///@ignore
 			static update_click = function() {
@@ -257,13 +261,11 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 
 			///@ignore
 			static __tear_down_private_struct = function() {
-				var _names = variable_struct_get_names(__);
+				var _names = ["property_spring_map", "property_bindings_map", "custom_property_map"];
 				var _len = array_length(_names);
 				for(var _i = 0; _i < _len; _i++){
 					var _v = variable_struct_get(self.__, _names[_i]);
-					if ds_exists(_v, ds_type_map){
-						ds_map_destroy(_v);
-					}
+					ds_map_destroy(_v);
 				}
 				delete __;
 			}
@@ -542,9 +544,22 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			return gekko_component_exists(__.parent);
 		}
 		static destroy = function() {
+			__gekko_add_to_destroy_array(self);
+		}
+		static with_children = function(_func) {
+			var _a = __.children;
+			var _len = array_length(_a);
+			for(var _i = 0; _i < _len; _i++) {
+				with(__.children[_i]){
+					_func();
+				}
+			}
+		}
+		
+		static __destroy = function() {
 			remove_all_property_bindings();
 			remove_parent();
-			__gekko_tracking_remove_component(self);
+			__gekko_tracking_remove_component(get_id());
 			__tear_down_private_struct();	
 		}
 		#endregion

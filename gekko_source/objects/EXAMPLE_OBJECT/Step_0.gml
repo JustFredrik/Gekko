@@ -16,3 +16,7 @@ if mouse_wheel_up() {
 if mouse_wheel_down() {
 	gekko_set_scale(gekko_get_scale() - 0.1);
 }
+	
+if keyboard_check_pressed(ord("R")){
+	room_restart();
+}

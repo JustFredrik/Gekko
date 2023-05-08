@@ -1,21 +1,31 @@
 
+function __gekko_create_manager() {
+	return {
+			component_map : ds_map_create(),
+			current_generator_id : 0,
+			draw_debug : false,
+			debug_enable_bounding_boxes : false,
+			font_map : ds_map_create(),
+			depth_array : [],
+			destroy_array : [],
+			gekko_scale : 1,
+			binding_array : []
+		}
+}
 
-function __gekko_get_manager() {
-	static _gekko_struct = {
-		componenet_map : ds_map_create(),
-		current_generator_id : 0,
-		draw_debug : false,
-		debug_enable_bounding_boxes : false,
-		font_map : ds_map_create(),
-		depth_array : [],
-		update_array : [],
-		gekko_scale : 1,
-		binding_array : []
+
+function __gekko_get_manager(reset=false) {
+	static _gekko_struct = __gekko_create_manager();
+	if reset {
 		
+		ds_map_destroy(_gekko_struct.component_map);
+		ds_map_destroy(_gekko_struct.font_map);
+		_gekko_struct = __gekko_create_manager();
 	}
 	
 	return _gekko_struct;
 }
+
 
 // TODO
 function __gekko_track_binding(_binding) {
@@ -62,7 +72,7 @@ function __gekko_tracking_add_component(_component){
 	var _m = __gekko_get_manager();
 	var _id = __gekko_generate_component_id();
 	_component.set_id(_id);
-	ds_map_add(_m.componenet_map, _id, _component);
+	ds_map_add(_m.component_map, _id, _component);
 	__gekko_depth_array_add(_component); // Add Component to the the depth Tracking list
 	return _id;
 }
@@ -77,7 +87,6 @@ function __gekko_depth_array_add(_component) {
 	var _m = __gekko_get_manager();
 	var _index = __gekko_array_get_index_bin(_m.depth_array,_component);
 	array_insert(_m.depth_array, _index, _component);
-	show_debug_message(_index);
 }
 
 
@@ -149,15 +158,32 @@ function __gekko_generate_component_id(){
 
 function __gekko_tracking_remove_component(_component_or_id){
 	var _m = __gekko_get_manager();
-	
-	// Component was passed as param
-	if is_struct(_component_or_id) {
-		ds_map_delete(_m.componenet_map, _component_or_id.id);
-	
-	// Component Id was passed as param
+	if gekko_is_component(_component_or_id) {
+		var _c	= _component_or_id;
+		var _id = _c.get_id();
 	} else {
-		ds_map_delete(_m.componenet_map, _component_or_id);
+		var _c = gekko_get_component(_component_or_id);
+		var _id = _component_or_id;
 	}
+	
+	__gekko_depth_array_remove(_c);
+	ds_map_delete(_m.component_map, _id);	
+}
+
+
+function __gekko_add_to_destroy_array(_component) {
+	array_push(__gekko_get_manager().destroy_array, _component);
+}
+
+
+function __gekko_go_through_destroy_array() {
+	var _m = __gekko_get_manager();
+	var _a = _m.destroy_array;
+	var _len = array_length(_a);
+	for(var _i = 0; _i < _len; _i++) {
+		_a[_i].__destroy();
+	}
+	_m.destroy_array = [];
 }
 
 
