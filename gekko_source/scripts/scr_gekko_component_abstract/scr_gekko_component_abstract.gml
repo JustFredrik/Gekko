@@ -254,6 +254,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				variable_struct_set(self.__, "velocity_" + _property_name, _val);
 			}
 				
+
 			///@ignore
 			static __tear_down_private_struct = function() {
 				var _names = variable_struct_get_names(__);
@@ -266,7 +267,6 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				}
 				delete __;
 			}
-				
 		#endregion
 	#endregion
 	
@@ -292,7 +292,6 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				var _binding = __.property_bindings_map[? + _property_name].destroy();
 				ds_map_delete(__.property_bindings_map, _property_name);
 			}
-			
 			return self;
 		}
 		static remove_all_property_bindings = function() {
