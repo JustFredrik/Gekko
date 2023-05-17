@@ -50,7 +50,7 @@ function GekkoComponentNineSlice(_sprite_index, _image_index, _anchor_point, _an
 		
 		/// @ignore
 		static draw_component = function() {
-			draw_sprite_ext(__.sprite, __.image_index, get_draw_x(), get_draw_y(), get_slice_scale_x(), get_slice_scale_y(), 0, c_white, 1);
+			draw_sprite_ext(__.sprite, __.image_index, get_draw_x(), get_draw_y(), get_slice_scale_x(), get_slice_scale_y(), 0, get_color(), 1);
 		}
 		#endregion
 		

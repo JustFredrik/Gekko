@@ -30,7 +30,7 @@ function GekkoComponentSprite(_sprite_index, _image_index, _anchor_point, _ancho
 			return (get_origin_offset_y() - 1) * get_total_scale();
 		}
 		static draw_component = function() {
-			draw_sprite(get_sprite(), get_image_index(), get_draw_x() + get_draw_sprite_offset_x(), get_draw_y() + get_draw_sprite_offset_y());
+			draw_sprite_ext(get_sprite(), get_image_index(), get_draw_x() + get_draw_sprite_offset_x(), get_draw_y() + get_draw_sprite_offset_y(), 1, 1, 0, get_color(), 1);
 		}
 		static __component_special_update = function() {
 			__.image_index += __.image_speed;

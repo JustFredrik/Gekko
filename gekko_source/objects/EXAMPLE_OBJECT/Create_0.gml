@@ -49,8 +49,8 @@ ui_heart = function(_hearth_spring) {
 	return _heart
 }
 	
-//ui_heart(new GekkoSpring());
-//ui_heart(new GekkoSpring())
-//.set_anchor_point(GEKKO_ANCHOR.MID_CENTER);
+// ui_heart(new GekkoSpring());
+// ui_heart(new GekkoSpring())
+// .set_anchor_point(GEKKO_ANCHOR.MID_CENTER);
 
 ui_health_bar();

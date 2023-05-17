@@ -22,7 +22,10 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			color				= c_white;
 			property_spring_map = ds_map_create();
 			property_bindings_map = ds_map_create();
+			property_animation_style = ds_map_create();
 			custom_property_map = ds_map_create();
+			property_lerp_speed = ds_map_create();
+			visible = true;
 	
 	
 			x = 0;
@@ -37,8 +40,13 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 	
 			component_depth	= 0;
 			mouse_pressed	= 0;
+			
+			target_anchor_offset_x = anchor_offset_x;
+			target_anchor_offset_y = anchor_offset_y;
+			velocity_anchor_offset_x = 0;
+			velocity_anchor_offset_y = 0;
 		}
-		add_animated_properties(["x", "y", "scale", "slice_width"]);
+		add_animated_properties(["x", "y", "scale", "slice_width", "anchor_offset_x", "anchor_offset_y"]);
 	
 		#region Internal Methods ==================================================================
 
@@ -198,6 +206,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			// Draw Methods
 			///@ignore
 			static draw = function() {
+				if not __.visible { return }
+				
 				var _g_scale = gekko_get_scale();
 				var _s = _g_scale * get_scale() * get_parent_scale();
 				matrix_set(matrix_world, matrix_build(0,0,0,0,0,0,
@@ -261,7 +271,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 
 			///@ignore
 			static __tear_down_private_struct = function() {
-				var _names = ["property_spring_map", "property_bindings_map", "custom_property_map"];
+				var _names = ["property_spring_map", "property_bindings_map", "custom_property_map", "property_animation_style", "property_lerp_speed"];
 				var _len = array_length(_names);
 				for(var _i = 0; _i < _len; _i++){
 					var _v = variable_struct_get(self.__, _names[_i]);
@@ -322,13 +332,13 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			variable_struct_set(self, "on_decrease_" + _property_name, method(self, _func));
 			return self;
 		}
-		static remove_property_on_change = function(_property_name, _func) {
+		static remove_property_on_change = function(_property_name) {
 			variable_struct_remove(self, "on_change_" + _property_name);
 		}
-		static remove_property_on_increase = function(_property_name, _func) {
+		static remove_property_on_increase = function(_property_name) {
 			variable_struct_remove(self, "on_increase_" + _property_name);
 		}
-		static remove_property_on_decrease = function(_property_name, _func) {
+		static remove_property_on_decrease = function(_property_name) {
 			variable_struct_remove(self, "on_decrease_" + _property_name);
 		}
 		#endregion
@@ -378,6 +388,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			return __.animated_properties; // Could perhaps copy the array, don't know if it's passed by value or ref in GM rn.
 		}	
 		static get_property_animation_style = function(_name){
+			if property_has_animation_style(_name){
+				return __.property_animation_style[? _name];
+			}
 			return __.default_animation_style;
 		}
 		static get_property_spring = function(_name) {
@@ -405,6 +418,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			}
 		}
 		static get_property_lerp_speed = function(_name) {
+			if property_has_animation_style(_name) {
+				return __.property_lerp_speed[? _name];
+			}
 			return __.lerp_speed;
 		}
 			
@@ -428,9 +444,40 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			return self;
 		}
 	
-		// TODO
-		static set_property_animation_style = function(_name, _style) { return self; }
-		static set_property_spring = function(_name, _spring) { return self; }
+		static set_property_animation_style = function(_name, _style) { 
+			
+			// Spring Animation
+			if gekko_is_spring(_style){
+				__.property_animation_style[? _name] = GEKKO_ANIMATION_STYLE.SPRING;
+				__.property_spring_map[? _name] = _style;
+			}
+		
+			// Lerp or Constant
+			if is_numeric(_style) {
+				__.property_lerp_speed[? _name] = min(1, _style);
+				if __.property_lerp_speed[? _name] == 1 {
+					__.property_animation_style[? _name] = GEKKO_ANIMATION_STYLE.INSTANT;
+				} else {
+					__.property_animation_style[? _name] = GEKKO_ANIMATION_STYLE.LERP;
+				}
+			}
+
+			return self; 
+		}
+		static remove_property_animation_style = function(_name) {
+			if property_has_animation_style(_name){
+				ds_map_delete(__.property_animation_style, _name);
+				if ds_map_exists(__.property_lerp_speed, _name) {
+					ds_map_delete(__.property_lerp_speed, _name);
+				}
+				if ds_map_exists(__.property_spring_map, _name) {
+					ds_map_delete(__.property_spring_map, _name);
+				}	
+			}
+		}
+		static property_has_animation_style = function(_name) {
+			return ds_map_exists(__.property_animation_style, _name);
+		}
 		static set_default_animation_style = function(_val) {
 		
 			// Spring Animation
@@ -483,6 +530,13 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		#endregion
 		
 		#region General
+		static is_visible = function() {
+			var _vis = __.visible;
+			if has_parent() {
+				_vis = _vis && get_parent().is_visible();
+			}
+			return _vis;
+		}
 		static is_offset_absolute = function() {
 			return __.offset_absolute;
 		}
@@ -565,6 +619,10 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		#endregion
 		
 		#region Setters
+		static set_visible = function(_bool) {
+			__.visible = _bool;
+			return self;
+		}
 		static set_x = function(_val) {
 			__.x = _val;
 			return self;
@@ -620,6 +678,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		}		
 		static set_target_scale = function(_val) {
 			__.target_scale = _val;
+			return self;
 		}
 		static set_depth = function(_val) {
 			var _m = __gekko_get_manager();
@@ -656,6 +715,22 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		}
 		static set_anchor_offset_y = function(_val) {
 			__.anchor_offset_y = _val;
+			return self;
+		}
+		static set_target_anchor_offset_x = function (_val) {
+			__.target_anchor_offset_x = _val;
+			return self;
+		}
+		static set_target_anchor_offset_y = function (_val) {
+			__.target_anchor_offset_y = _val;
+			return self;
+		}
+		static set_velocity_anchor_offset_x = function (_val) {
+			__.velocity_anchor_offset_x = _val;
+			return self;
+		}
+		static set_velocity_anchor_offset_y = function (_val) {
+			__.velocity_anchor_offset_y = _val;
 			return self;
 		}
 		static set_component_alignment = function(_alignment) {
@@ -719,6 +794,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		}
 		static get_target_y = function() {
 			return __.target_y;
+		}
+		static get_target_scale = function() {
+			return __.target_scale;
 		}
 		static get_x = function() {
 			return __.x;

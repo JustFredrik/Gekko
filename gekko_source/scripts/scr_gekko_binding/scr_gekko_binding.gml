@@ -43,7 +43,7 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		} else {
 			var _valid_struct	= is_struct(_si) && variable_struct_exists(_si, _property_name);
 		}
-		var _valid_inst		= instance_exists(_si) && variable_instance_exists(_si, _property_name); 
+		var _valid_inst		= false && variable_instance_exists(_si, _property_name); 
 
 	
 		if _valid_struct { return "struct"; } 
@@ -65,7 +65,7 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		var _si = get_target();
 		var _property_name = get_target_variable_name();
 		var _valid_struct	= is_struct(_si) && __variable_exists(_si, _property_name);
-		var _valid_inst		= instance_exists(_si) && __variable_exists(_si, _property_name); 
+		var _valid_inst		= false && __variable_exists(_si, _property_name); 
 
 	
 		if _valid_struct && __.target_type == "struct" { return true; } 
@@ -87,7 +87,7 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		var _property_name = get_property_name();
 		
 		var _valid_struct	= is_struct(_si);
-		var _valid_inst		= instance_exists(_si);
+		var _valid_inst		= false;
 	
 		if _valid_struct && __.owner_type == "struct" { return true; } 
 		elif _valid_inst && __.owner_type == "inst"   { return true; } 
@@ -95,7 +95,7 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 	}
 	static __owner_exists = function() {
 		var _o = get_owner();
-		return (instance_exists(_o) or is_struct(_o));
+		return (false or is_struct(_o));
 	}
 	static __owner_has_set_method = function() {
 		if __.owner_type == "struct" {

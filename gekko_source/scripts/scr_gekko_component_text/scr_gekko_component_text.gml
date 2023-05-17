@@ -13,7 +13,7 @@ function GekkoComponentText(_text, _font, _anchor_point, _anchor_offset_x, _anch
 		// Method Overrides
 		static get_true_width = function(){
 			var _tmp = draw_get_font();
-			draw_set_font(__.font);
+			draw_set_font(__.font.get_font());
 			var _w = string_width(__.text);
 			_w -= __.font.get_character_seperation();
 			draw_set_font(_tmp);
