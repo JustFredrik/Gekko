@@ -27,7 +27,6 @@ function __gekko_get_manager(reset=false) {
 }
 
 
-// TODO
 function __gekko_track_binding(_binding) {
 	var _m = __gekko_get_manager();
 	array_push(_m.binding_array, _binding);

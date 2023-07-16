@@ -6,6 +6,6 @@
   "isDnD": false,
   "parent": {
     "name": "Util",
-    "path": "folders/Gekko UI/Util.yy",
+    "path": "folders/Gekko UI/Internal/Util.yy",
   },
 }

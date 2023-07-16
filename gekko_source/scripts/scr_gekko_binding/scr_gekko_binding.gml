@@ -1,5 +1,18 @@
-// Script assets have changed for v2.3.0 see
-// https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
+
+/*=========================================================
+
+Gekko Util :Binding ( INTERNAL )
+
+GekkoBindings are managers that control and manage
+the automatic linking and binding of component properties
+with external struct data.
+
+They are used internally by Gekko and will
+never need to be manually instantiated by
+users of the library.
+
+=========================================================*/
+
 function GekkoBinding(_owner, _property_name, _target, _variable_name) constructor {
 	
 	#region Private ============================================
@@ -47,14 +60,14 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 
 	
 		if _valid_struct { return "struct"; } 
-		elif _valid_inst { return "inst";   } 
+		else if _valid_inst { return "inst";   } 
 		else			 { return noone;    }
 	}
 	
 	static __variable_exists = function(_context, _variable_name){
 		if gekko_is_component(_context) {
 			return variable_struct_exists(_context.__, _variable_name);
-		} elif is_struct(_context) {
+		} else if is_struct(_context) {
 			return variable_struct_exists(_context, _variable_name);
 		} else {
 			return variable_instance_exists(_context, _variable_name);
@@ -69,15 +82,17 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 
 	
 		if _valid_struct && __.target_type == "struct" { return true; } 
-		elif _valid_inst && __.target_type == "inst"   { return true; } 
+		else if _valid_inst && __.target_type == "inst"   { return true; } 
 		else { return false; }
 	}
 	static __fetch_variable = function() {
+		var _target_var_name = get_target_variable_name();
+		var _target = get_target();
 		if __.target_type == "struct" {
-			var _var = variable_struct_get(get_target(), get_target_variable_name());
+			var _var = variable_struct_get(_target, _target_var_name);
 			return _var;
 		} else {
-			var _var = variable_instance_get(get_target(), get_target_variable_name());
+			var _var = variable_instance_get(_target, _target_var_name);
 			return _var;
 		}
 	}
@@ -90,27 +105,30 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		var _valid_inst		= false;
 	
 		if _valid_struct && __.owner_type == "struct" { return true; } 
-		elif _valid_inst && __.owner_type == "inst"   { return true; } 
+		else if _valid_inst && __.owner_type == "inst"   { return true; } 
 		else { return false; }
 	}
 	static __owner_exists = function() {
 		var _o = get_owner();
-		return (false or is_struct(_o));
+		return (is_struct(_o));
 	}
 	static __owner_has_set_method = function() {
+		var _o = get_owner();
 		if __.owner_type == "struct" {
-			var _set_name = "set_" + get_property_name();
-			return variable_struct_exists(get_owner(), _set_name) && is_method(variable_struct_get(get_owner(), _set_name));
+			var _prop_name = get_property_name();
+			var _set_name = "set_" + _prop_name;
+			return variable_struct_exists(_o, _set_name) && is_method(variable_struct_get(_o, _set_name));
 		} else {
-			return variable_instance_exists(get_owner(), "set_" + get_property_name()) && is_method(variable_instance_get(get_owner(), _set_name));;
+			return variable_instance_exists(_o, "set_" + _prop_name) && is_method(variable_instance_get(_o, _set_name));;
 		}
 	}
 	static __owner_has_method = function(_method_name) {
+		var _o = get_owner();
 		if not __owner_exists() {return false}
 		if __.owner_type == "struct" {
-			return variable_struct_exists(get_owner(), _method_name) && is_method(variable_struct_get(get_owner(), _method_name));
+			return variable_struct_exists(_o, _method_name) && is_method(variable_struct_get(_o, _method_name));
 		} else {
-			return variable_instance_exists(get_owner(), _method_name) && is_method(variable_instance_get(get_owner(), _method_name));
+			return variable_instance_exists(_o, _method_name) && is_method(variable_instance_get(_o, _method_name));
 		}
 	}
 	static __owner_get_method = function(_method_name) {
@@ -123,13 +141,13 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		}
 	}
 	static __owner_has_on_change_method = function() {
-		return __owner_has_method("on_change_" + get_property_name());
+		return __owner_has_method("on_change_" + __.property_name);
 	}
 	static __owner_has_on_increase_method = function() {
-		return __owner_has_method("on_increase_" + get_property_name());
+		return __owner_has_method("on_increase_" + __.property_name);
 	}
 	static __owner_has_on_decrease_method = function() {
-		return __owner_has_method("on_decrease_" + get_property_name());
+		return __owner_has_method("on_decrease_" + __.property_name);
 	}
 	static __owner_call_method = function(_method_name){
 		if __owner_has_method(_method_name) {
@@ -139,16 +157,13 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 	}
 	
 	static __call_on_change = function() {
-		var _method_name = "on_change_" + get_property_name();
-		__owner_call_method(_method_name, get_property_name());
+		__owner_call_method("on_change_" + __.property_name);
 	}
 	static __call_on_increase = function() {
-		var _method_name = "on_increase_" + get_property_name();
-		__owner_call_method(_method_name, get_property_name());
+		__owner_call_method("on_increase_" + __.property_name);
 	}
 	static __call_on_decrease = function() {
-		var _method_name = "on_decrease_" + get_property_name();
-		__owner_call_method(_method_name);
+		__owner_call_method("on_decrease_" + __.property_name);
 	}
 	
 	static __set_previous_value = function(_val) {
@@ -162,14 +177,16 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 		if __owner_exists() {
 			var _o = get_owner();
 			var _new_val = __fetch_variable();
+			var _prop_name = get_property_name();
+			
 			// Owner has a dedicated set method.
 			if __owner_has_set_method() {
-				var _method = method(get_owner(), __owner_get_method("set_" + get_property_name()));
-				_method(get_value());
+				var _method = method(_o, __owner_get_method("set_" + _prop_name));
+				_method(_new_val);
 
 			// Is Custom Property
-			} else if get_owner().is_custom_property(get_property_name()) {
-				get_owner().set_custom_property(get_property_name(), _new_val);	
+			} else if _o.is_custom_property(_prop_name) {
+				_o.set_custom_property(_prop_name, _new_val);	
 			
 			// Is weird Shenanigans
 			}				
@@ -199,7 +216,7 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 			if is_numeric(_prev) && is_numeric(_curr){
 				if _curr > _prev {
 					__call_on_increase();
-				} elif _curr < _prev {
+				} else if _curr < _prev {
 					__call_on_decrease();
 				}
 			}
@@ -241,15 +258,6 @@ function GekkoBinding(_owner, _property_name, _target, _variable_name) construct
 	}
 	
 	// Track Binding for automatic Binding update through gekko_update();
-	
-	//show_message(string(_owner) + " " + _property_name + " " + string(_target) + " " + _variable_name);
-	
 	__gekko_track_binding(self);
 
 }
-
-//var _healthbar = gekko_create_healthbar()
-//.property_binding_add("width", o_game, "health")
-//.property_set_on_change()
-//.property_set_on_increase()
-//.property_set_on_decrease()

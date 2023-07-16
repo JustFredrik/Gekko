@@ -1,5 +1,12 @@
+/*=========================================================
 
+Gekko Component : Text
 
+This is a component for drawing text with Gekko.
+The components uses GekkoFonts when specifying the
+font to use (see: Gekko UI/Util/scr_gekko_font )
+
+=========================================================*/
 
 function GekkoComponentText(_text, _font, _anchor_point, _anchor_offset_x, _anchor_offset_y, _parent) : GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) constructor {
 	
@@ -55,7 +62,12 @@ function GekkoComponentText(_text, _font, _anchor_point, _anchor_offset_x, _anch
 	
 	// Public =================================================================
 		
-		// Setters
+		#region Setters ===================================
+		
+		///@desc Sets the GekkoFont to use with the component
+		///@param {Struct.GekkoFont} font
+		///@self GekkoComponentText
+		///@return {Struct.GekkoComponentText} self
 		static set_font = function(_font) {
 		if is_struct(_font){
 			__.font = _font;
@@ -64,6 +76,11 @@ function GekkoComponentText(_text, _font, _anchor_point, _anchor_offset_x, _anch
 		}
 		return self;
 	}
+			
+		///@desc Sets the text to display on the component
+		///@param {String} text
+		///@self GekkoComponentText
+		///@return {Struct.GekkoComponentText} self
 		static set_text = function(_text) {
 		_text = string(_text);
 		
@@ -86,14 +103,25 @@ function GekkoComponentText(_text, _font, _anchor_point, _anchor_offset_x, _anch
 
 		return self;
 	}
+			
+		#endregion
 	
-		// Getters
+		#region Getters ===================================
+		
+		///@desc Gets the GekkoFont to use with the component
+		///@self GekkoComponentText
+		///@return {Struct.GekkoFont} gekko_font
 		static get_font = function() {
 			return __.font;
 		}
+
+		///@desc Gets the text to display on the component
+		///@self GekkoComponentText
+		///@return {String} text
 		static get_text = function() {
 			return __.text;
 		}
 			
+		#endregion
+			
 }
-

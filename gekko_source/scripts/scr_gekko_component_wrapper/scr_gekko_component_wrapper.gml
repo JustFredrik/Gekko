@@ -1,9 +1,16 @@
-// Script assets have changed for v2.3.0 see
-// https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
+/*=========================================================
+
+Gekko Component : Wrapper
+
+This is a component that wraps around of a group of
+components. It simply wraps its bounding-box to contain
+all of it's sub-components.
+
+=========================================================*/
 
 function GekkoComponentWrapper(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) : GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) constructor {
 	
-	#region Private ===========================================================
+	#region Private =====================================================================
 		__gekko_create_private_struct(self); with(__){
 			wrapped_components = [];
 		}
@@ -63,14 +70,23 @@ function GekkoComponentWrapper(_parent, _anchor_point, _anchor_offset_x, _anchor
 		}
 	#endregion
 
-	// Public =================================================================
+	// Public ===========================================================================
 		
-		//General
+		#region General ===================================
+		
+		///@desc Adds a component to the wrapper
+		///@context GekkoComponentWrapper
+		///@return {Struct.GekkoComponentWrapper} self
 		static add_component = function(_component_or_id){
 			var _c = gekko_get_component(_component_or_id);
 			array_push(__.wrapped_components, _c);
 			return self
 		}
+			
+		///@desc Removes a component to the wrapper
+		///@param {Struct.GekkoComponent | Real} component_or_id 
+		///@context GekkoComponentWrapper
+		///@return {Struct.GekkoComponentWrapper} self
 		static remove_component = function(_component_or_id){
 			var _id		= gekko_component_get_id(_component_or_id);
 			var _len	= array_length(__.wrapped_components);
@@ -82,5 +98,7 @@ function GekkoComponentWrapper(_parent, _anchor_point, _anchor_offset_x, _anchor
 			}
 			return self;
 		}
+			
+		#endregion
 		
 }
