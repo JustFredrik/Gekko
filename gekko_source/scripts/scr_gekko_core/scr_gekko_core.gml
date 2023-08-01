@@ -62,6 +62,8 @@ Github	: https://github.com/JustFredrik/Gekko
 function gekko_update() {
 	var _m = __gekko_get_manager();	
 	
+	__gekko_inc_step(); // Increment the step tracker.
+	
 
 	var _keys = ds_map_keys_to_array(_m.component_map);
 	var _len = array_length(_keys);
