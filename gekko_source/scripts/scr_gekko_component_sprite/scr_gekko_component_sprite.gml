@@ -66,7 +66,28 @@ function GekkoComponentSprite(_sprite_index, _image_index, _anchor_point, _ancho
 	#endregion
 	
 	// Public ===========================================================================
-	
+		
+		#region General ===================================
+			
+			///@desc overrides the current sprite and plays an animation once, then reverts to the default sprite.
+			/// If a callback is provided it will be called once the animation has ended. Calling this method multiple times
+			/// will result in animation being queued one after another. Setting instant to true will clear the queue and instantly
+			/// play the provided animation.
+			///@param {Asset.GMSprite} sprite_index
+			///@param {Real} starting_frame
+			///@param {Real} image_speed
+			///@param {Bool} instant
+			///@param {Function} callback
+			///@self GekkoComponentSprite
+			///@return {Struct.GekkoComponentText} self
+			static play_animation = function(_sprite, _starting_frame=0, _image_speed = 1, _instant=false, _callback=noone) {
+				if _instant { __.animation_queue = []; }
+				array_push(__.animation_queue, new GekkoAnimation(_sprite, _starting_frame, _image_speed, _callback));
+				return self;
+			} 
+			
+		#endregion
+		
 		#region Setters ===================================
 		
 		///@desc Sets the sprite for the component
@@ -99,23 +120,6 @@ function GekkoComponentSprite(_sprite_index, _image_index, _anchor_point, _ancho
 			__.image_speed = _spd;
 			return self;
 		}
-		
-		///@desc overrides the current sprite and plays an animation once, then reverts to the default sprite.
-		/// If a callback is provided it will be called once the animation has ended. Calling this method multiple times
-		/// will result in animation being queued one after another. Setting instant to true will clear the queue and instantly
-		/// play the provided animation.
-		///@param {Asset.GMSprite} sprite_index
-		///@param {Real} starting_frame
-		///@param {Real} image_speed
-		///@param {Bool} instant
-		///@param {Function} callback
-		///@self GekkoComponentSprite
-		///@return {Struct.GekkoComponentText} self
-		static play_animation = function(_sprite, _starting_frame=0, _image_speed = 1, _instant=false, _callback=noone) {
-			if _instant { __.animation_queue = []; }
-			array_push(__.animation_queue, new GekkoAnimation(_sprite, _starting_frame, _image_speed, _callback));
-			return self;
-		} 
 		
 		#endregion
 		
