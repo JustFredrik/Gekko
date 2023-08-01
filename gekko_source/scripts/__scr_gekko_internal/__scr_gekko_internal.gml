@@ -9,15 +9,15 @@ function __gekko_create_manager() {
 			depth_array : [],
 			destroy_array : [],
 			gekko_scale : 1,
+			gekko_step : 0,
 			binding_array : []
 		}
 }
 
 
-function __gekko_get_manager(reset=false) {
+function __gekko_get_manager(_reset=false) {
 	static _gekko_struct = __gekko_create_manager();
-	if reset {
-		
+	if _reset {
 		ds_map_destroy(_gekko_struct.component_map);
 		ds_map_destroy(_gekko_struct.font_map);
 		_gekko_struct = __gekko_create_manager();
@@ -196,4 +196,14 @@ function __gekko_set_draw_depth(_val){
 function __gekko_set_draw_instance(_instance) {
 	var _m = __gekko_get_manager();
 	_m.draw_instance = _instance;
+}
+	
+
+function __gekko_get_step() {
+	return __gekko_get_manager().gekko_step;
+}
+
+
+function __gekko_inc_step() {
+	__gekko_get_manager().gekko_step += 1;
 }

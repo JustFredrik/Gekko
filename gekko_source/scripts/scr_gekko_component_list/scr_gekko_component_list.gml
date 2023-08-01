@@ -19,9 +19,18 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		list_direction = GEKKO_LIST_DIRECTION.VERTICAL;
 		list_component_alignnment = GEKKO_COMPONENT_ALIGNMENT.MID_CENTER;
 		padding = 0;
+		last_cache = -1;
+		cache_child_anchor_x_horizontal = [];
+		cache_child_anchor_y_vertical = [];
+		cache_width_vertical = 0;
+		cache_width_horizontal = 0;
+		cache_height_horizontal = 0;
+		cache_height_vertical = 0;
+		position_map = ds_map_create();
 	}	
 		
-		#region Internal Methods
+		#region Old Internal Methods
+		/*
 		static __get_child_alignment = function(){
 			if __.list_direction == GEKKO_LIST_DIRECTION.HORIZONTAL {
 				return gekko_component_alignment_combine(GEKKO_COMPONENT_ALIGNMENT_X.LEFT, gekko_get_alignment_vertical(__.list_component_alignnment));
@@ -36,6 +45,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				__.component_array[_i].set_component_alignment(_alignment);
 			}
 		}
+		
 		static __get_child_anchor_y_vertical = function(_component_or_id) {
 			var _index = get_component_index(_component_or_id);
 			var _c = __.component_array[_index];
@@ -84,6 +94,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			}
 			return get_x() + _offset - (__.seperation * 0.5 * (__.component_array[_index].get_target_scale() == 0));
 		}
+		
 		static __get_width_horizontal = function() {
 			var _w = min(0, - __.seperation);
 			var _len = array_length(__.component_array);
@@ -100,7 +111,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				_w = max(_w, __.component_array[_i].get_width());
 			}
 			return _w;
-		}
+		}	
 		static __get_height_horizontal = function() {
 			var _h = 0;
 			var _len = array_length(__.component_array); 
@@ -118,6 +129,140 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			}
 			return _h;
 		}
+		*/
+		#endregion
+		
+		#region Internal Methods
+		
+		static __get_child_alignment = function(){
+			if __.list_direction == GEKKO_LIST_DIRECTION.HORIZONTAL {
+				return gekko_component_alignment_combine(GEKKO_COMPONENT_ALIGNMENT_X.LEFT, gekko_get_alignment_vertical(__.list_component_alignnment));
+			} else {
+				return gekko_component_alignment_combine(gekko_get_alignment_horizontal(__.list_component_alignnment), GEKKO_COMPONENT_ALIGNMENT_Y.TOP );
+			}
+		}	
+		static __update_child_alignment = function(){
+			var _len	= array_length(__.component_array);
+			var _alignment =  __get_child_alignment();
+			for(var _i = 0; _i < _len; _i++) {
+				__.component_array[_i].set_component_alignment(_alignment);
+			}
+		}
+		
+		static __get_child_anchor_y_vertical = function(_component_or_id) {
+			var _index = get_component_index(_component_or_id);
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_child_anchor_y_vertical[_index]; 
+		}
+		static __get_child_anchor_y_horizontal = function(_component_or_id) {
+			//var _c = gekko_get_component(_component_or_id);
+		
+			switch(gekko_get_alignment_vertical(__.list_component_alignnment)) {
+				case GEKKO_COMPONENT_ALIGNMENT_Y.TOP:
+					return get_y();
+			
+				case GEKKO_COMPONENT_ALIGNMENT_Y.MID:
+					return get_y() + (get_height() / 2. );
+				
+				case GEKKO_COMPONENT_ALIGNMENT_Y.BOT:
+					return get_y() + get_height();
+			}
+		}	
+		static __get_child_anchor_x_vertical = function(_component_or_id) {
+			//var _c = gekko_get_component(_component_or_id);
+		
+			switch(gekko_get_alignment_horizontal(__.list_component_alignnment)) {
+				case GEKKO_COMPONENT_ALIGNMENT_X.LEFT:
+					return get_x();
+			
+				case GEKKO_COMPONENT_ALIGNMENT_X.CENTER:
+					return get_x() + (get_width() / 2. );
+				
+				case GEKKO_COMPONENT_ALIGNMENT_X.RIGHT:
+					return get_y() + get_width();
+			}
+		}
+		static __get_child_anchor_x_horizontal = function(_component_or_id) {
+			var _index = get_component_index(_component_or_id);
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_child_anchor_x_horizontal[_index]; 
+		}
+		
+		static __update_child_and_size_cache = function() {
+			__.last_cache = __gekko_get_step();
+			if get_list_direction() == GEKKO_LIST_DIRECTION.HORIZONTAL {
+				__update_child_and_size_cache_x_horizontal();				
+			} else {
+				__update_child_and_size_cache_y_vertical();	
+			}
+		}
+		
+		static __update_child_and_size_cache_x_horizontal = function() {
+			var _len = array_length(__.component_array);
+			var _comp_arr = __.component_array;
+			var _sep = __.seperation; var _padding = __.padding;
+			var _offset = _padding + get_x();
+			if _len <= 0 {return }
+			
+			__.cache_child_anchor_x_horizontal[0] = _offset - (_sep * 0.5 * (_comp_arr[0].get_target_scale() == 0));;
+			__.cache_height_horizontal = max(0, _comp_arr[0].get_height());
+			
+			for(var _i = 1; _i < _len; _i++) {	
+				_offset += _comp_arr[_i].get_width();
+				_offset += (_comp_arr[_i].get_target_scale() != 0) * _sep;
+				__.cache_child_anchor_x_horizontal[_i] = _offset - (_sep * 0.5 * (_comp_arr[_i].get_target_scale() == 0));
+				__.cache_height_horizontal = max(__.cache_height_horizontal, _comp_arr[_i].get_height());
+			}
+			__.cache_width_horizontal = _offset - _padding;
+		}	
+		static __update_child_and_size_cache_y_vertical = function() {
+			var _len = array_length(__.component_array);
+			var _comp_arr = __.component_array;
+			var _sep = __.seperation; var _padding = __.padding;
+			var _offset = _padding + get_y();
+			if _len <= 0 {return }
+			
+			__.cache_child_anchor_y_vertical[0] = _offset - (_sep * 0.5 * (_comp_arr[0].get_target_scale() == 0));;
+			__.cache_width_vertical = max(0, _comp_arr[0].get_width());
+			
+			for(var _i = 1; _i < _len; _i++) {	
+				_offset += _comp_arr[_i].get_height();
+				_offset += (_comp_arr[_i].get_target_scale() != 0) * _sep;
+				__.cache_child_anchor_y_vertical[_i] = _offset - (_sep * 0.5 * (_comp_arr[_i].get_target_scale() == 0));
+				__.cache_width_vertical = max(__.cache_width_vertical, _comp_arr[_i].get_width());
+			}
+			__.cache_height_vertical = _offset - _padding;
+		}
+		
+		static __get_width_horizontal = function() {
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_width_horizontal;
+		}	
+		static __get_width_vertical = function() {
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_width_vertical;
+		}	
+		static __get_height_horizontal = function() {
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_height_horizontal;
+		}
+		static __get_height_vertical = function() {
+			if __.last_cache != __gekko_get_step() {
+				__update_child_and_size_cache();
+			}
+			return __.cache_height_vertical;
+		}
+	
 		#endregion
 		
 		#region Parent Method Overrides
@@ -220,6 +365,9 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
 				.set_parent(self);
 			array_push(__.component_array, _c);
+			array_push(__.cache_child_anchor_x_horizontal, 0);
+			array_push(__.cache_child_anchor_y_vertical, 0);
+			__.position_map[? _c.get_id()] = array_length(__.component_array) - 1;
 			return self
 		}
 			
@@ -237,6 +385,8 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
 				.set_parent(self);
 			array_push(__.component_array, _c);
+			array_push(__.cache_child_anchor_x_horizontal, undefined);
+			array_push(__.cache_child_anchor_y_vertical, undefined);
 			return self
 		}
 			
@@ -249,7 +399,9 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			var _index = get_component_index(_id);
 			if _index != -1 {
 				__.component_array[_index].remove_parent();
-				//array_delete(__.component_array, _index, 1);
+				//array_delete(__.component_array, _index, 1); // Why is this removed ??
+				array_delete(__.cache_child_anchor_x_horizontal, _index, 1);
+				array_delete(__.cache_child_anchor_y_vertical, _index, 1);
 			}
 			return self;
 		}
@@ -321,6 +473,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		///@return	{Real}	index
 		static get_component_index = function(_component_or_id) {
 			var _id		= gekko_component_get_id(_component_or_id);
+			return __.position_map[? _id]
 			var _len	= array_length(__.component_array);
 			for(var _i = 0; _i < _len; _i++) {
 				if __.component_array[_i].get_id() == _id {
