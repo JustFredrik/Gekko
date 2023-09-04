@@ -1,7 +1,7 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "__scr_gekko_util_internal",
+  "name": "__scr_gekko_internal",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {

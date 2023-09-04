@@ -16,6 +16,8 @@ ui_health_bar = function() {
 	var _hearth_spring = new GekkoSpring(); // Use the same spring animations for all hearts
 	for(_i = 0; _i <= 6; _i++) { // Create all the Hearts
 		_sprite = gekko_create_sprite(gekko_sprite_health, 0)
+		.set_image_speed(0)
+		.label_add("base_heart")
 		.add_custom_property("health")
 		.set_property_binding("health", EXAMPLE_OBJECT, "hp") // Bind health property to o_game.hp, auto updates.
 		.set_default_animation_style(_hearth_spring)
@@ -37,4 +39,6 @@ ui_health_bar = function() {
 	return _list;
 }
 
-ui_health_bar();
+hp_list = ui_health_bar();
+
+gekko_debug_enable_bounding_boxes(true);

@@ -1,23 +1,52 @@
 
+function __gekko_create_manager() {
+	return {
+			component_map : ds_map_create(),
+			current_generator_id : 0,
+			draw_debug : false,
+			debug_enable_bounding_boxes : false,
+			font_map : ds_map_create(),
+			label_map : ds_map_create(),
+			depth_array : [],
+			destroy_array : [],
+			gekko_scale : 1,
+			binding_array : []
+		}
+}
 
-function __gekko_get_manager() {
-	static _gekko_struct = {
-		componenet_map : ds_map_create(),
-		current_generator_id : 0,
-		draw_debug : false,
-		debug_enable_bounding_boxes : false,
-		font_map : ds_map_create(),
-		depth_array : [],
-		update_array : [],
-		gekko_scale : 1,
-		binding_array : []
+
+function __gekko_track_component_label(_component, _label) {
+	var _m = __gekko_get_manager();
+	if not ds_map_exists(_m.label_map, _label){
+		_m.label_map[? _label] = [];
+	}
+	var _arr = _m.label_map[? _label];
+	array_push(_arr, _component);
+}
+
+function __gekko_remove_component_label(_component, _label) {
+	var _m = __gekko_get_manager();
+	var _arr = _m.label_map[? _label];
+	var _i = array_find_index(_arr, function(elem, index){return gekko_component_is_equal(elem, _component)});
+	if _i >= 0 {
+		array_delete(_arr, _i, 1);
+	}
+
+}
+
+function __gekko_get_manager(reset=false) {
+	static _gekko_struct = __gekko_create_manager();
+	if reset {
 		
+		ds_map_destroy(_gekko_struct.component_map);
+		ds_map_destroy(_gekko_struct.font_map);
+		_gekko_struct = __gekko_create_manager();
 	}
 	
 	return _gekko_struct;
 }
 
-// TODO
+
 function __gekko_track_binding(_binding) {
 	var _m = __gekko_get_manager();
 	array_push(_m.binding_array, _binding);
@@ -62,7 +91,7 @@ function __gekko_tracking_add_component(_component){
 	var _m = __gekko_get_manager();
 	var _id = __gekko_generate_component_id();
 	_component.set_id(_id);
-	ds_map_add(_m.componenet_map, _id, _component);
+	ds_map_add(_m.component_map, _id, _component);
 	__gekko_depth_array_add(_component); // Add Component to the the depth Tracking list
 	return _id;
 }
@@ -77,7 +106,6 @@ function __gekko_depth_array_add(_component) {
 	var _m = __gekko_get_manager();
 	var _index = __gekko_array_get_index_bin(_m.depth_array,_component);
 	array_insert(_m.depth_array, _index, _component);
-	show_debug_message(_index);
 }
 
 
@@ -149,15 +177,32 @@ function __gekko_generate_component_id(){
 
 function __gekko_tracking_remove_component(_component_or_id){
 	var _m = __gekko_get_manager();
-	
-	// Component was passed as param
-	if is_struct(_component_or_id) {
-		ds_map_delete(_m.componenet_map, _component_or_id.id);
-	
-	// Component Id was passed as param
+	if gekko_is_component(_component_or_id) {
+		var _c	= _component_or_id;
+		var _id = _c.get_id();
 	} else {
-		ds_map_delete(_m.componenet_map, _component_or_id);
+		var _c = gekko_get_component(_component_or_id);
+		var _id = _component_or_id;
 	}
+	
+	__gekko_depth_array_remove(_c);
+	ds_map_delete(_m.component_map, _id);	
+}
+
+
+function __gekko_add_to_destroy_array(_component) {
+	array_push(__gekko_get_manager().destroy_array, _component);
+}
+
+
+function __gekko_go_through_destroy_array() {
+	var _m = __gekko_get_manager();
+	var _a = _m.destroy_array;
+	var _len = array_length(_a);
+	for(var _i = 0; _i < _len; _i++) {
+		_a[_i].__destroy();
+	}
+	_m.destroy_array = [];
 }
 
 

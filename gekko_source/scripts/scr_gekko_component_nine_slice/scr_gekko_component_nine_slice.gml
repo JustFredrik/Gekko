@@ -1,9 +1,15 @@
+/*=========================================================
 
+Gekko Component : Nine-Slice
 
+This is a component for drawing GameMaker nine-slice
+sprites.
+
+=========================================================*/
 
 function GekkoComponentNineSlice(_sprite_index, _image_index, _anchor_point, _anchor_offset_x, _anchor_offset_y, _parent) : GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) constructor {
 	
-	#region Private ===========================================================
+	#region Private =====================================================================
 		__gekko_create_private_struct(self); with(__) {
 			sprite = _sprite_index;
 			image_index = _image_index;
@@ -50,63 +56,120 @@ function GekkoComponentNineSlice(_sprite_index, _image_index, _anchor_point, _an
 		
 		/// @ignore
 		static draw_component = function() {
-			draw_sprite_ext(__.sprite, __.image_index, get_draw_x(), get_draw_y(), get_slice_scale_x(), get_slice_scale_y(), 0, c_white, 1);
+			draw_sprite_ext(__.sprite, __.image_index, get_draw_x(), get_draw_y(), get_slice_scale_x(), get_slice_scale_y(), 0, get_color(), 1);
 		}
 		#endregion
 		
 	#endregion
 	
-	// Public =================================================================
+	// Public ===========================================================================
 	
-		// Setters
-		static set_slice_width = function(_val) {
-			__.slice_width = _val;
+		#region Setters ===================================
+		
+		///@desc Sets the width of the nine-slice.
+		///@param {Real} width
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
+		static set_slice_width = function(width) {
+			__.slice_width = width;
 			update_target_x();
 			update_target_y();
 			return self;
 		}
-		static set_slice_height = function(_val) {
-			__.slice_height = _val;
+		
+		///@desc Sets the height of the nine-slice.
+		///@param	{Real}		height
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
+		static set_slice_height = function(height) {
+			__.slice_height = height;
 			update_target_x();
 			update_target_y();
 			return self;
 		}
+			
+		///@desc Sets the target width of the nine-slice
+		///@param	{Real}	target_width
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
 		static set_target_slice_width = function(_val) {
 			__.target_slice_width = _val;
 			return self;
 		}
+			
+		///@desc Sets the target height of the nine-slice
+		///@param	{Real}	target_height
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
 		static set_target_slice_height = function(_val) {
 			__.target_slice_height = _val;
 			return self;
 		}
+			
+		///@desc Sets the velocity of the width of the nine-slice
+		///@param	{Real}	velocity
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
 		static set_velocity_slice_width = function(_val) {
 			__.velocity_slice_width = _val;
 			return self;
 		}
+		
+		///@desc Sets the velocity of the height of the nine-slice
+		///@param	{Real}	velocity
+		///@context GekkoComponentNineSlice
+		///@return {Struct.GekkoComponentNineSlice}
 		static set_velocity_slice_height = function(_val) {
 		__.velocity_slice_height = _val;
 		return self;
 	}
+		
+		#endregion
 			
-		// Getters
-		static get_slice_width = function(_val) {
+		#region Getters ===================================
+		
+		///@desc	Gets the width of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		width of the nine-slice 
+		static get_slice_width = function() {
 			return __.slice_width;
 		}
-		static get_slice_height = function(_val) {
+			
+		///@desc	Gets the height of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		height of the nine-slice 
+		static get_slice_height = function() {
 			return __.slice_height;
 		}
-		static get_target_slice_width = function(_val) {
+			
+		///@desc	Gets the target width of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		target width of the nine-slice 
+		static get_target_slice_width = function() {
 			return __.target_slice_width;
 		}
-		static get_target_slice_height = function(_val) {
+			
+		///@desc	Gets the target height of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		target height of the nine-slice 
+		static get_target_slice_height = function() {
 			return __.target_slice_height;
 		}
-		static get_velocity_slice_width = function(_val) {
+			
+		///@desc	Gets the velocity of the width of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		velocity of the width of the nine-slice 
+		static get_velocity_slice_width = function() {
 			return __.velocity_slice_width;
 		}
-		static get_velocity_slice_height = function(_val) {
+		
+		///@desc	Gets the velocity of the height of the nine-slice
+		///@context GekkoComponentNineSlice
+		///@return	{Real}		velocity of the height of the nine-slice 
+		static get_velocity_slice_height = function() {
 			return __.velocity_slice_height;
 		}
+			
+		#endregion
 		
 }
-

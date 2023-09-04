@@ -1,9 +1,18 @@
-// Script assets have changed for v2.3.0 see
-// https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
+/*=========================================================
+
+Gekko Component : List
+
+This component is a container that can hold 
+multiple other sub-components and automatically 
+organize them. It will highjack the components alignment
+and position and automatically place them relative to
+the lists x, y position and alignment settings.
+
+=========================================================*/
 
 function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) : GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _anchor_offset_y) constructor {
 	
-	#region Private ===========================================================
+	#region Private =====================================================================
 		__gekko_create_private_struct(self); with(__){
 		component_array = [];
 		seperation = 0;
@@ -32,9 +41,10 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			var _c = __.component_array[_index];
 			var _offset = __.padding;
 			for(var _i = 0; _i < _index; _i++){
-				_offset += __.component_array[_i].get_height() + __.seperation;
+				_offset += __.component_array[_i].get_height();
+				_offset += (__.component_array[_i].get_target_scale() != 0) * __.seperation;
 			}
-			return get_y() + _offset;
+			return get_y() + _offset - (__.seperation * 0.5 * (__.component_array[_index].get_target_scale() == 0));
 		}
 		static __get_child_anchor_y_horizontal = function(_component_or_id) {
 			//var _c = gekko_get_component(_component_or_id);
@@ -69,16 +79,17 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			var _c = __.component_array[_index];
 			var _offset = __.padding;
 			for(var _i = 0; _i < _index; _i++){
-				_offset += __.component_array[_i].get_width() + __.seperation;
+				_offset += __.component_array[_i].get_width();
+				_offset += (__.component_array[_i].get_target_scale() != 0) * __.seperation;
 			}
-			return get_x() + _offset;
+			return get_x() + _offset - (__.seperation * 0.5 * (__.component_array[_index].get_target_scale() == 0));
 		}
 		static __get_width_horizontal = function() {
 			var _w = min(0, - __.seperation);
 			var _len = array_length(__.component_array);
 			for(var _i = 0; _i < _len; _i++) {
 				_w += __.component_array[_i].get_width();
-				_w += __.seperation;
+				_w += __.seperation * (__.component_array[_i].get_target_scale() != 0);
 			}
 			return _w;
 		}
@@ -103,7 +114,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			var _len = array_length( __.component_array);
 			for(var _i = 0; _i < _len; _i++) {
 				_h += __.component_array[_i].get_height();
-				_h += __.seperation;
+				_h += __.seperation * (__.component_array[_i].get_target_scale() != 0);
 			}
 			return _h;
 		}
@@ -152,13 +163,39 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				return __get_child_anchor_x_vertical(_component_or_id);
 			}
 		}
+		static remove_child = function(_child_or_id) {
+			
+			// Remove from children
+			var _len = array_length(__.children);
+			for(var i = 0; i < _len; i++){
+				if gekko_component_is_equal(__.children[i], _child_or_id){
+					__.children[i].__.parent = noone;
+					array_delete(__.children, i, 1);
+					break
+				}
+			}
+			
+			// Remove from component array
+			var _len = array_length(__.component_array);
+			for(var i = 0; i < _len; i++) {
+				if gekko_component_is_equal(__.component_array[i], _child_or_id){
+					array_delete(__.component_array, i, 1);
+					return
+				}
+			}
+			//throw("Trying to remove a child that is not a child of parent component.");
+		}
 		#endregion
 		
 	#endregion
 	
-	// Public =================================================================
+	// Public ===========================================================================
 		
-		// General
+		#region General ===================================
+		
+		///@desc Transpose the list between a horizontal and vertical list.
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList self
 		static transpose = function() {
 			if __.list_direction == GEKKO_LIST_DIRECTION.VERTICAL {
 				__.list_direction = GEKKO_LIST_DIRECTION.HORIZONTAL;
@@ -169,6 +206,10 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		
 			return self;
 		}
+			
+		///@desc Adds a component to the end of the list.
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self
 		static add_component = function(_component_or_id){
 			var _c = gekko_get_component(_component_or_id);
 		
@@ -178,28 +219,67 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				.set_anchor_offset_y(0)
 				.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
 				.set_parent(self);
-		
 			array_push(__.component_array, _c);
 			return self
 		}
+			
+		///@desc Inserts a component to the list at the provided index.
+		///@param {Struct.GekkoComponentList | Real} component_or_id
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self
+		static insert_component = function(_component_or_id, _index){
+			var _c = gekko_get_component(_component_or_id);
+		
+			var _alignment = __get_child_alignment();
+			_c.set_component_alignment(_alignment)
+				.set_anchor_offset_x(0)
+				.set_anchor_offset_y(0)
+				.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
+				.set_parent(self);
+			array_push(__.component_array, _c);
+			return self
+		}
+			
+		///@desc Remove a component from the list.
+		///@param {Struct.GekkoComponentList | Real} component_or_id
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self
 		static remove_component = function(_component_or_id) {
 			var _id		= gekko_component_get_id(_component_or_id);
 			var _index = get_component_index(_id);
 			if _index != -1 {
-				array_delete(__.component_array, _index, 1);
+				__.component_array[_index].remove_parent();
+				//array_delete(__.component_array, _index, 1);
 			}
 			return self;
 		}
+			
+		#endregion
 		
-		// Setters
+		#region Setters ===================================
+		
+		///@desc Sets the pixel seperation value between the components in the list.
+		///@param {Real} value
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self
 		static set_seperation = function(_val) {
 			__.seperation = max(0, _val);
 			return self;
 		}
+			
+		///@desc Sets the padding of the list. How much the list should add padding around it's components.
+		///@param {Real} value
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self	
 		static set_padding = function(_base) {
 			__.padding = _base;
 			return self;
 		}
+			
+		///@desc Sets the direction of the list vertical (true) or horizontal (false).
+		///@param {bool} value
+		///@context GekkoComponentList
+		///@return {Struct.GekkoComponentList} self	
 		static set_list_direction = function(_direction) {
 			if _direction == GEKKO_LIST_DIRECTION.VERTICAL {
 				__.list_direction = GEKKO_LIST_DIRECTION.VERTICAL;
@@ -210,16 +290,35 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			return self;
 		}
 	
-		// Getters
+		#endregion
+		
+		#region Getters ===================================
+		
+		///@desc	Gets the pixel seperation value between the components in the list.
+		///@context GekkoComponentList
+		///@return	{Real}	value
 		static get_seperation = function() {
 			return __.seperation;
 		}
+		
+		///@desc	Gets the padding of the list. How much the list should add padding around it's components.
+		///@context GekkoComponentList
+		///@return	{Real}	value
 		static get_padding = function() {
 		return __.padding;
 	}
+			
+		///@desc	Gets the direction of the list vertical (true) or horizontal (false).
+		///@context GekkoComponentList
+		///@return	{Bool}	value 
 		static get_list_direction = function() {
 		return __.list_direction;
 	}
+		
+		///@desc	Gets the index in the list of a component (-1 if it isn't in the list).
+		///@param	{Struct.GekkoComponent | Real}	component_or_id
+		///@context GekkoComponentList
+		///@return	{Real}	index
 		static get_component_index = function(_component_or_id) {
 			var _id		= gekko_component_get_id(_component_or_id);
 			var _len	= array_length(__.component_array);
@@ -230,5 +329,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			}
 			return -1;
 		}
-
+			
+		#endregion
+		
 }

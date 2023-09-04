@@ -5,7 +5,7 @@
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "Constructors",
-    "path": "folders/Gekko UI/Components/Constructors.yy",
+    "name": "Components",
+    "path": "folders/Gekko UI/Components.yy",
   },
 }
