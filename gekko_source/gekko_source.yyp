@@ -41,6 +41,7 @@
     {"id":{"name":"scr_gekko_component_list","path":"scripts/scr_gekko_component_list/scr_gekko_component_list.yy",},},
     {"id":{"name":"scr_gekko_core","path":"scripts/scr_gekko_core/scr_gekko_core.yy",},},
     {"id":{"name":"scr_gekko_enums","path":"scripts/scr_gekko_enums/scr_gekko_enums.yy",},},
+    {"id":{"name":"scr_gekko_pubsub","path":"scripts/scr_gekko_pubsub/scr_gekko_pubsub.yy",},},
     {"id":{"name":"gekko_spr_anchor","path":"sprites/gekko_spr_anchor/gekko_spr_anchor.yy",},},
     {"id":{"name":"gekko_sprite_health_crack","path":"sprites/gekko_sprite_health_crack/gekko_sprite_health_crack.yy",},},
     {"id":{"name":"quiz","path":"scripts/quiz/quiz.yy",},},

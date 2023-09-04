@@ -7,6 +7,7 @@ function __gekko_create_manager() {
 			debug_enable_bounding_boxes : false,
 			font_map : ds_map_create(),
 			label_map : ds_map_create(),
+			pubsub_struct : {},
 			depth_array : [],
 			destroy_array : [],
 			gekko_scale : 1,
@@ -172,6 +173,12 @@ function __gekko_generate_component_id(){
 	var _m = __gekko_get_manager();
 	_m.current_generator_id += 1;
 	return _m.current_generator_id - 1;
+}
+
+function __gekko_generate_uid(){
+	static _id = -1;
+	_id ++;
+	return _id;
 }
 
 

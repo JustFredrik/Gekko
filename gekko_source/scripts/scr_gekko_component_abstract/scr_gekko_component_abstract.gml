@@ -34,6 +34,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			custom_property_map = ds_map_create();
 			property_lerp_speed = ds_map_create();
 			label_map			= ds_map_create();
+			uid					= __gekko_generate_uid();
 			
 			//Shader Variables
 			is_using_shader = false;
@@ -200,9 +201,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			}
 			
 			///@ignore
-			static update_all_children = function() {
-				///@function update_all_children()
-		
+			static update_all_children = function() {		
 				var _len = array_length(__.children);
 				for(var _i = 0; _i < _len; _i++){
 					__.children[_i].update();
@@ -350,7 +349,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				delete __;
 			}
 				
-
+				
 		#endregion
 	#endregion
 	
@@ -1055,6 +1054,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_visible = function(_bool) {
 			__.visible = _bool;
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_VISIBLE);
 			return self;
 		}
 			
@@ -1064,6 +1064,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_x = function(_val) {
 			__.x = _val;
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_X);
 			return self;
 		}
 			
@@ -1073,6 +1074,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self	
 		static set_y = function(_val) {
 			__.y = _val;
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_Y);
 			return self;
 		}
 			
@@ -1127,6 +1129,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 	
 			__.velocity_x = 0;
 			__.velocity_y = 0;
+			
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_SCALE);
 		
 			return self;
 		}		
@@ -1168,6 +1172,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_offset_absolute = function(_bool) {
 			__.offset_absolute = _bool;
+			
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_OFFET_ABSOLUTE);
 			return self;
 		}
 	
@@ -1276,6 +1282,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self	
 		static set_on_click = function(_func) {
 			on_click = method(self, _func);
+			
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.CLICK);
 			return self;
 		}
 			
@@ -1285,6 +1293,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self		
 		static set_on_tap = function(_func) {
 			on_tap = method(self, _func);
+			
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.TAP);
 			return self;
 		}
 			
@@ -1309,6 +1319,11 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		#endregion
 			
 		#region Getters ===================================
+		
+		static get_uid = function() {
+			return __.uid;
+		}
+		
 		
 		///@desc Gets the current draw color of the component.
 		///@context GekkoComponentAbstract

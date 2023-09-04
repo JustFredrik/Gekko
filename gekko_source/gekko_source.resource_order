@@ -21,6 +21,7 @@
     {"name":"EXAMPLE_OBJECT","order":1,"path":"objects/EXAMPLE_OBJECT/EXAMPLE_OBJECT.yy",},
     {"name":"scr_gekko_component_list","order":1,"path":"scripts/scr_gekko_component_list/scr_gekko_component_list.yy",},
     {"name":"scr_gekko_core","order":4,"path":"scripts/scr_gekko_core/scr_gekko_core.yy",},
+    {"name":"scr_gekko_pubsub","order":2,"path":"scripts/scr_gekko_pubsub/scr_gekko_pubsub.yy",},
     {"name":"gekko_spr_anchor","order":1,"path":"sprites/gekko_spr_anchor/gekko_spr_anchor.yy",},
     {"name":"gekko_sprite_health_crack","order":6,"path":"sprites/gekko_sprite_health_crack/gekko_sprite_health_crack.yy",},
     {"name":"quiz","order":2,"path":"scripts/quiz/quiz.yy",},
