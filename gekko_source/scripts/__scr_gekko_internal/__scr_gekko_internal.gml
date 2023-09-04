@@ -11,6 +11,7 @@ function __gekko_create_manager() {
 			depth_array : [],
 			destroy_array : [],
 			gekko_scale : 1,
+			gekko_step : 0,
 			binding_array : []
 		}
 }
