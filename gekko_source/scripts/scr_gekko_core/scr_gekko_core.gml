@@ -206,6 +206,33 @@ function gekko_get_component(_id) {
 	return undefined;
 }
 	
+	
+function gekko_get_components_by_label(_label) {
+	var _m = __gekko_get_manager();
+	var _return_arr = [];
+	
+	if ds_map_exists(_m.label_map, _label) {
+		var _src = _m.label_map[? _label];
+		array_copy(_return_arr, 0, _src, 0, array_length(_src));
+	}
+	return _return_arr;
+}	
+
+
+function gekko_destroy_components(_component_or_array) {
+	if is_array(_component_or_array){
+		var _len = array_length(_component_or_array);
+		var _i = 0;
+		repeat(_len) {
+			_component_or_array[_i].destroy();
+			_i++;
+		}
+	} else {
+		_component_or_array.destroy();
+	}
+}
+	
+	
 ///@desc Checks wether a component exists (true) or not (false).
 ///@param {Real}	component_or_id		A Gekko component or a component id.
 ///@return {Bool}	wether the component exists (true) or not (false). 
