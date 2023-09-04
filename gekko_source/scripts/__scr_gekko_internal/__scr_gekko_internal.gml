@@ -6,12 +6,32 @@ function __gekko_create_manager() {
 			draw_debug : false,
 			debug_enable_bounding_boxes : false,
 			font_map : ds_map_create(),
+			label_map : ds_map_create(),
 			depth_array : [],
 			destroy_array : [],
 			gekko_scale : 1,
-			gekko_step : 0,
 			binding_array : []
 		}
+}
+
+
+function __gekko_track_component_label(_component, _label) {
+	var _m = __gekko_get_manager();
+	if not ds_map_exists(_m.label_map, _label){
+		_m.label_map[? _label] = [];
+	}
+	var _arr = _m.label_map[? _label];
+	array_push(_arr, _component);
+}
+
+function __gekko_remove_component_label(_component, _label) {
+	var _m = __gekko_get_manager();
+	var _arr = _m.label_map[? _label];
+	var _i = array_find_index(_arr, function(elem, index){return gekko_component_is_equal(elem, _component)});
+	if _i >= 0 {
+		array_delete(_arr, _i, 1);
+	}
+
 }
 
 

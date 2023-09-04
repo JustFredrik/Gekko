@@ -33,6 +33,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			property_animation_style = ds_map_create();
 			custom_property_map = ds_map_create();
 			property_lerp_speed = ds_map_create();
+			label_map			= ds_map_create();
 			
 			//Shader Variables
 			is_using_shader = false;
@@ -335,7 +336,12 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 
 			///@ignore
 			static __tear_down_private_struct = function() {
-				var _names = ["property_spring_map", "property_bindings_map", "custom_property_map", "property_animation_style", "property_lerp_speed"];
+				var _names = [	"property_spring_map", 
+								"property_bindings_map", 
+								"custom_property_map", 
+								"property_animation_style", 
+								"property_lerp_speed",
+								"label_map"];
 				var _len = array_length(_names);
 				for(var _i = 0; _i < _len; _i++){
 					var _v = variable_struct_get(self.__, _names[_i]);
@@ -963,6 +969,10 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		static destroy = function() {
 			__gekko_add_to_destroy_array(self);
 		}
+		
+		static destroy_hirarchy = function() {
+			self.__delete_hirarchy();
+		}
 			
 		///@desc	Runs a function with all children.
 		///@context GekkoComponentAbstract
@@ -983,10 +993,58 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		static __destroy = function() {
 			remove_all_property_bindings();
 			remove_parent();
+			__remove_all_children();
 			__gekko_tracking_remove_component(get_id());
 			__tear_down_private_struct();	
 		}
+		
+		
+		static __remove_all_children = function() {
+			var _len = array_length(__.children);
+			repeat(_len) {
+				__.children[0].remove_parent();
+			}
+		}
+		
+		
+		static __delete_hirarchy = function () {
+			var _len = array_length(__.children);
+			var _i = 0;
+			repeat(_len) {
+				__.children[_i].__delete_hirarchy();
+				_i++;
+			}
+			self.destroy();
+		
+		}
+		
+		
+		static delete_hirarchy = function() {
+			__delete_hirarchy();
+		}
 			
+		#endregion
+		
+		#region Labels ====================================
+			static label_add = function(_label) {
+				if not has_label(_label) {
+					__gekko_track_component_label(self, _label);
+					ds_map_add(__.label_map, _label, true);
+				}
+				return self;
+			}
+			
+			static label_remove = function(_label) {
+				if has_label(_label) {
+					__gekko_remove_component_label(self, _label);
+					ds_map_delete(__.label_map, _label);
+				}
+				return self;			
+			}
+			
+			static has_label = function(_label){
+				return ds_map_exists(__.label_map, _label);
+			}
 		#endregion
 		
 		#region Setters ===================================
