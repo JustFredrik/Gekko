@@ -92,6 +92,9 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			if __.last_cache != __gekko_get_step() {
 				__update_child_and_size_cache();
 			}
+			
+			show_debug_message($" {_index} : {array_length(__.cache_child_anchor_x_horizontal)}");
+			
 			return __.cache_child_anchor_x_horizontal[_index]; 
 		}
 		
@@ -103,6 +106,8 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 				__update_child_and_size_cache_y_vertical();	
 			}
 		}
+		
+		
 		
 		static __update_child_and_size_cache_x_horizontal = function() {
 			var _comp_arr = __.component_array;
@@ -287,22 +292,25 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		static add_component = function(_component_or_id){
 			var _c = gekko_get_component(_component_or_id);
 			var _alignment = __get_child_alignment();
-			_c.set_component_alignment(_alignment)
-				.set_anchor_offset_x(0)
-				.set_anchor_offset_y(0)
-				.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
-				.set_parent(self);
 			array_push(__.component_array, _c);
 			array_push(__.cache_child_anchor_x_horizontal, 0);
 			array_push(__.cache_child_anchor_y_vertical, 0);
-			subscribe_to_changes(_c);
 			__update_child_and_size_cache();
+			subscribe_to_changes(_c);
+			__.position_map[? _c.get_id()] = array_length(__.component_array) - 1;
 			
+			_c.set_component_alignment(_alignment)
+			.set_anchor_offset_x(0)
+			.set_anchor_offset_y(0)
+			.set_anchor_point(GEKKO_ANCHOR.TOP_LEFT)
+			.set_parent(self);
+			show_debug_message($"Hello? ....");	
 			with_children(function() {
 				cache_update();
 			});
 			
-			__.position_map[? _c.get_id()] = array_length(__.component_array) - 1;
+			
+		
 			return self
 		}
 			
