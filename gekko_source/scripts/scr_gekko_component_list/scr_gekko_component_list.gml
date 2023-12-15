@@ -83,6 +83,12 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		}
 		static __get_child_anchor_x_horizontal = function(_component_or_id) {
 			var _index = get_component_index(_component_or_id);
+			try {
+				show_debug_message($"Getting anchor x for item nr {_index}. {__.cache_child_anchor_x_horizontal[_index]}" );
+			} catch(error) {
+			
+			}
+			
 			if __.last_cache != __gekko_get_step() {
 				__update_child_and_size_cache();
 			}
@@ -99,8 +105,8 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		}
 		
 		static __update_child_and_size_cache_x_horizontal = function() {
-			var _len = array_length(__.component_array);
 			var _comp_arr = __.component_array;
+			var _len = array_length( _comp_arr);
 			var _sep = __.seperation; var _padding = __.padding;
 			var _offset = _padding + get_x();
 			if _len <= 0 {return }
@@ -277,6 +283,7 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		///@desc Adds a component to the end of the list.
 		///@context GekkoComponentList
 		///@return {Struct.GekkoComponentList} self
+		// TODO Remove code and call insert_component from within.
 		static add_component = function(_component_or_id){
 			var _c = gekko_get_component(_component_or_id);
 			var _alignment = __get_child_alignment();
@@ -288,6 +295,13 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 			array_push(__.component_array, _c);
 			array_push(__.cache_child_anchor_x_horizontal, 0);
 			array_push(__.cache_child_anchor_y_vertical, 0);
+			subscribe_to_changes(_c);
+			__update_child_and_size_cache();
+			
+			with_children(function() {
+				cache_update();
+			});
+			
 			__.position_map[? _c.get_id()] = array_length(__.component_array) - 1;
 			return self
 		}
@@ -319,6 +333,8 @@ function GekkoComponentList(_parent, _anchor_point, _anchor_offset_x, _anchor_of
 		static remove_component = function(_component_or_id) {
 			var _id		= gekko_component_get_id(_component_or_id);
 			var _index = get_component_index(_id);
+			
+			// TODO Update __.position_map when component is removed from list
 			if _index != -1 {
 				__.component_array[_index].remove_parent();
 			}

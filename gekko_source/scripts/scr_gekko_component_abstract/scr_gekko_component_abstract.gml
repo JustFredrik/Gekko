@@ -110,6 +110,10 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			
 			static cache_update = function() {
 				cache_update_parent_scale();
+				update_target_x();
+				update_x();
+				update_target_y();
+				update_y();
 				cache_update_total_scale();
 				update_is_visible();
 			}
