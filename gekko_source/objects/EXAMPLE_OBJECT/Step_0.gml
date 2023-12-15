@@ -15,6 +15,11 @@ if keyboard_check_pressed(vk_delete) {
 if keyboard_check_pressed(vk_enter) {
 	gekko_destroy_components(gekko_get_components_by_label("base_heart"));
 }
+
+if keyboard_check_pressed(vk_enter) {
+	follow3.set_anchor_point(GEKKO_ANCHOR.NONE);
+	follow2.remove_child(follow3);
+}
 	
 // Adjust Gekko UI scale
 if mouse_wheel_up() {

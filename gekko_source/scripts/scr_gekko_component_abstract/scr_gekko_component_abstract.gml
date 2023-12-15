@@ -113,7 +113,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				cache_update_total_scale();
 				update_is_visible();
 			}
-			//TODO
+	
+	
 			static subscribe_to_changes = function(_target) {
 
 				__gekko_pubsub_subscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_X, method(self, function(){
@@ -139,6 +140,14 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 					update_y();
 				}));
 			}
+			
+			static unsubscribe_to_changes = function(_target) {
+				__gekko_pubsub_unsubscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_X);
+				__gekko_pubsub_unsubscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_Y);
+				__gekko_pubsub_unsubscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_VISIBLE);
+				__gekko_pubsub_unsubscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_SCALE);
+			}
+			
 
 		#endregion
 		
@@ -966,6 +975,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				__.parent.remove_child(self);
 				__.parent = noone;
 				cache_update();
+				
 			}
 
 		}
@@ -1041,6 +1051,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			for(var i = 0; i < _len; i++){
 				if gekko_component_is_equal(__.children[i], _child_or_id){
 					__.children[i].__.parent = noone;
+					__.children[i].unsubscribe_to_changes(self);
 					__.children[i].cache_update();
 					array_delete(__.children, i, 1);
 					return
