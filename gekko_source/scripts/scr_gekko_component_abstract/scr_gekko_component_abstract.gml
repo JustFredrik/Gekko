@@ -60,9 +60,88 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			target_anchor_offset_y = anchor_offset_y;
 			velocity_anchor_offset_x = 0;
 			velocity_anchor_offset_y = 0;
+			
+			cache_pubsub_events = [
+				GEKKO_COMPONENT_EVENT.SET_X,
+				GEKKO_COMPONENT_EVENT.SET_Y,
+				GEKKO_COMPONENT_EVENT.SET_SCALE,
+				GEKKO_COMPONENT_EVENT.SET_VISIBLE
+			]
+			
+			parent_is_visible = true;
+			cache_total_scale = 1;
+
 		}
 		add_animated_properties(["x", "y", "scale", "slice_width", "anchor_offset_x", "anchor_offset_y"]);
-	
+		
+		#region Cache ==============================================================================
+			update_is_visible();
+			cache_update_parent_scale();
+			cache_update_total_scale();
+			
+			static cache_update_parent_scale = function() {
+				if has_parent() {
+					__.cache_parent_scale = __.parent.__.scale * __.parent.get_parent_scale();
+				} else {
+					__.cache_parent_scale = 1;
+				}
+			}
+			
+			static update_is_visible = function() {
+				var _prev_vis = is_visible();
+				if has_parent() {
+					var _parent_vis = get_parent().is_visible();
+					__.parent_is_visible = _parent_vis;
+				} else {
+					__.parent_is_visible = true;
+				}
+				if (is_visible() != _prev_vis) {
+					__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_VISIBLE);
+				}
+			}
+
+			static cache_update_total_scale = function() {
+				var _prev_scale = get_total_scale();
+				__.cache_total_scale = get_scale() * get_parent_scale()
+				if ( __.cache_total_scale != _prev_scale ) {
+					__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_SCALE);
+				}
+			}
+			
+			static cache_update = function() {
+				cache_update_parent_scale();
+				cache_update_total_scale();
+				update_is_visible();
+			}
+			//TODO
+			static subscribe_to_changes = function(_target) {
+
+				__gekko_pubsub_subscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_X, method(self, function(){
+					update_target_x();
+					update_x();
+				}));
+
+				__gekko_pubsub_subscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_Y, method(self, function(){
+					update_target_y();
+					update_y();
+				}));
+
+				__gekko_pubsub_subscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_VISIBLE, method(self, function(){
+					update_is_visible();
+				}));
+
+				__gekko_pubsub_subscribe(self, _target, GEKKO_COMPONENT_EVENT.SET_SCALE, method(self, function(){
+					cache_update_parent_scale();
+					cache_update_total_scale(); // These two are redundant and the total scale cache could be removed.
+					update_target_x();
+					update_x();
+					update_target_y();
+					update_y();
+				}));
+			}
+
+		#endregion
+		
 		#region Internal Methods ==================================================================
 
 			// Update Methods
@@ -71,14 +150,17 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			static update = function() {
 				step();
 				update_click();
-				update_target_x();
-				update_target_y();
+				
+				//update_target_x();
+				//update_target_y();
+				//update_all_children();
 				//update_x();
 				//update_y();
-				update_all_children();
 				//update_scale();
-				update_animated_properties();
+				//update_animated_properties();
+				
 				__component_special_update();
+				
 			}	
 			
 			static __component_special_update = function() {
@@ -95,6 +177,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 					if is_tapable() {
 						if mouse_check_button_pressed(mb_left) {
 							on_tap();
+							__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.TAP);
 						}
 					}
 			
@@ -115,13 +198,13 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 				}
 			}
 			
-			///@ignore
+			///@ignor
 			static update_x = function() {
 				var _x = get_target_x();
-				if ( __.lerp_speed == 1 ) {
-					__.x = _x;
+				if ( __.lerp_speed >= 1 ) {
+					set_x(_x);
 				} else {
-					__.x = lerp(__.x, _x, __.lerp_speed * gekko_get_time_scale());
+					set_x(lerp(get_x(), _x, __.lerp_speed * gekko_get_time_scale()));
 				}
 			}	
 			
@@ -129,9 +212,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			static update_y = function() {
 				var _y = get_target_y();
 				if ( __.lerp_speed == 1 ) {
-					__.y = _y;
+					set_y(_y);
 				} else {
-					__.y = lerp(__.y, _y, __.lerp_speed * gekko_get_time_scale());
+					set_y(lerp(get_y(), _y, __.lerp_speed * gekko_get_time_scale()));
 				}
 			}
 			
@@ -211,16 +294,22 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			///@ignore
 			static update_scale = function() {
 				if __.lerp_speed >= 1 {
-					set_scale(__.target_scale, true);
+					if (__.target_scale != __.cache_scale){
+						set_scale(__.target_scale, true);
+					}
+					
 				} else {
-					set_scale(lerp(__.scale, __.target_scale, __.lerp_speed), true);
+					var _lerp = lerp(__.scale, __.target_scale, __.lerp_speed);
+					if (_lerp != __cache_scale){
+						set_scale( _lerp, true);
+					}
 				}
 			}
 		
 			// Draw Methods
 			///@ignore
 			static draw = function() {
-				if not __.visible { return }
+				if not is_visible() { return }
 				
 				// Apply Scaling
 				var _g_scale = gekko_get_scale();
@@ -699,6 +788,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		static set_property_target = function(_name, _val) {
 			var _target_name = "target_" + _name;
 			variable_struct_set(self.__, _target_name, _val);
+			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.PROPERTY_CHANGE);
 			return self;
 		}
 			
@@ -711,6 +801,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			var _method_name = "set_" + _name;
 			if not variable_struct_exists(self, _method_name) {
 				variable_struct_set(self.__, _name, _val);
+				__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.PROPERTY_CHANGE);
 			}
 			var _set_method = variable_struct_get(self, _method_name);
 			_set_method(_val);
@@ -851,13 +942,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@context GekkoComponentAbstract
 		///@return	{Bool} is_visible
 		static is_visible = function() {
-			var _vis = __.visible;
-			if has_parent() {
-				_vis = _vis && get_parent().is_visible();
-			}
-			return _vis;
+			return __.visible && __.parent_is_visible;
 		}
-			
+				
 		///@desc	Checks if the component offset is absolute (true) or not (false).
 		///@context GekkoComponentAbstract
 		///@return	{Bool} is_visible	
@@ -875,8 +962,12 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@desc	Removes the parent from the component.
 		///@context GekkoComponentAbstract
 		static remove_parent = function() {
-			if has_parent() { __.parent.remove_child(self); }
-			__.parent = noone;
+			if has_parent() {
+				__.parent.remove_child(self);
+				__.parent = noone;
+				cache_update();
+			}
+
 		}
 		
 		///@desc	Checks if a position is inside the components bounding box (true) or not (false).
@@ -934,7 +1025,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		static add_child = function(_child) {
 			if _child.has_parent() {
 				_child.remove_parent();
-				_child.__.parent = self;	
+				_child.__.parent = self;
+				_child.cache_update(); // This is performing double cache updates, might want to look into fixing this.
 			}
 			array_push(__.children, _child);
 			//update();
@@ -949,6 +1041,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			for(var i = 0; i < _len; i++){
 				if gekko_component_is_equal(__.children[i], _child_or_id){
 					__.children[i].__.parent = noone;
+					__.children[i].cache_update();
 					array_delete(__.children, i, 1);
 					return
 				}
@@ -1053,8 +1146,10 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@context GekkoComponentAbstract
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_visible = function(_bool) {
-			__.visible = _bool;
-			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_VISIBLE);
+			if (_bool != __.visible){
+				__.visible = _bool;
+				__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_VISIBLE);
+			}
 			return self;
 		}
 			
@@ -1063,18 +1158,24 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@context GekkoComponentAbstract
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_x = function(_val) {
-			__.x = _val;
-			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_X);
+			if (__.x != _val) {
+				__.x = _val;
+				__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_X);
+			}
 			return self;
 		}
-			
+		
+
 		///@desc	Sets the y position of the component.
 		///@param	{Real} value
 		///@context GekkoComponentAbstract
 		///@return	{Struct.GekkoComponentAbstract} self	
 		static set_y = function(_val) {
-			__.y = _val;
-			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_Y);
+			if (__.y != _val){
+				__.y = _val;
+				__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_Y);
+			}
+			
 			return self;
 		}
 			
@@ -1092,46 +1193,48 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@context GekkoComponentAbstract
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_scale = function(_val) {
+			
+			if (_val != __.scale) {
+				var prev_width = get_width();
+				var prev_height = get_height();
 		
-			var prev_width = get_width();
-			var prev_height = get_height();
-		
-			__.scale = _val 
+				__.scale = _val 
 
-			var width_diff	= get_width() - prev_width;
-			var height_diff = get_height() - prev_height;
+				var width_diff	= get_width() - prev_width;
+				var height_diff = get_height() - prev_height;
 		
-			// Reposition relative to scale change
-			switch(gekko_get_alignment_horizontal(get_component_alignment())){ // Adjust X
-				case GEKKO_COMPONENT_ALIGNMENT_X.LEFT:
-					break
+				// Reposition relative to scale change
+				switch(gekko_get_alignment_horizontal(get_component_alignment())){ // Adjust X
+					case GEKKO_COMPONENT_ALIGNMENT_X.LEFT:
+						break
 			
-				case GEKKO_COMPONENT_ALIGNMENT_X.CENTER:
-					__.x -= width_diff / 2;
-					break
+					case GEKKO_COMPONENT_ALIGNMENT_X.CENTER:
+						__.x -= width_diff / 2;
+						break
 			
-				case GEKKO_COMPONENT_ALIGNMENT_X.RIGHT:
-					__.x -= width_diff;
-					break
-			}
-			switch(gekko_get_alignment_vertical(get_component_alignment())){   // Adjust Y
-				case GEKKO_COMPONENT_ALIGNMENT_Y.TOP:
-					break
+					case GEKKO_COMPONENT_ALIGNMENT_X.RIGHT:
+						__.x -= width_diff;
+						break
+				}
+				switch(gekko_get_alignment_vertical(get_component_alignment())){   // Adjust Y
+					case GEKKO_COMPONENT_ALIGNMENT_Y.TOP:
+						break
 			
-				case GEKKO_COMPONENT_ALIGNMENT_Y.MID:
-					__.y -= height_diff / 2;
-					break
+					case GEKKO_COMPONENT_ALIGNMENT_Y.MID:
+						__.y -= height_diff / 2;
+						break
 			
-				case GEKKO_COMPONENT_ALIGNMENT_Y.BOT:
-					__.y -= height_diff;
-					break
-			}
+					case GEKKO_COMPONENT_ALIGNMENT_Y.BOT:
+						__.y -= height_diff;
+						break
+				}
 	
-			__.velocity_x = 0;
-			__.velocity_y = 0;
+				__.velocity_x = 0;
+				__.velocity_y = 0;
 			
-			__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_SCALE);
-		
+				__gekko_pubsub_publish(self, GEKKO_COMPONENT_EVENT.SET_SCALE);
+			}
+			
 			return self;
 		}		
 			
@@ -1154,7 +1257,8 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 			__gekko_depth_array_update_pos(self);
 			return self;
 		}
-			
+		
+		// TODO: Make method __add_child that can be overridden in list to have two way subscription.
 		///@desc	Sets the parent of the component.
 		///@param	{Struct.GekkoComponentAbstract} gekko_component
 		///@context GekkoComponentAbstract
@@ -1162,7 +1266,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		static set_parent = function(_parent) {
 			if has_parent() { remove_parent(); }
 			__.parent = _parent;
+			subscribe_to_changes(_parent);
 			array_push(__.parent.__.children, self);
+			cache_update();
 			return self;
 		}
 	
@@ -1192,6 +1298,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_anchor_offset_x = function(_val) {
 			__.anchor_offset_x = _val;
+			update_target_x();
 			return self;
 		}
 		
@@ -1201,6 +1308,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return	{Struct.GekkoComponentAbstract} self
 		static set_anchor_offset_y = function(_val) {
 			__.anchor_offset_y = _val;
+			update_target_y();
 			return self;
 		}
 		
@@ -1344,7 +1452,7 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@return {Real}  scale of the parent component.
 		static get_parent_scale = function() {
 			if has_parent() {
-				return __.parent.__.scale * __.parent.get_parent_scale();
+				return __.cache_parent_scale;
 			}
 			return 1;
 		} 
@@ -1651,9 +1759,9 @@ function GekkoComponentAbstract(_parent, _anchor_point, _anchor_offset_x, _ancho
 		///@context GekkoComponentAbstract
 		///@return {Real} Final total scale.
 		static get_total_scale = function() {
-			return get_scale() * get_parent_scale();
+			return __.cache_total_scale;
 		}	
-			
+		
 		#endregion
 		
 		#region Event methods =============================

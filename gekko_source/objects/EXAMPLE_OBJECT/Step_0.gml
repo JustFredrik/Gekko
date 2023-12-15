@@ -18,8 +18,15 @@ if keyboard_check_pressed(vk_enter) {
 	
 // Adjust Gekko UI scale
 if mouse_wheel_up() {
-	gekko_set_scale(gekko_get_scale() + 0.1);
+	follow.set_scale(follow.get_scale() + 0.1);
 }		
 if mouse_wheel_down() {
-	gekko_set_scale(gekko_get_scale() - 0.1);
+	follow.set_scale(follow.get_scale() - 0.1);
 }
+
+if keyboard_check_pressed(vk_space) {
+	follow.set_visible(! follow.is_visible());
+}
+
+data.x = mouse_x;
+data.y = mouse_y;

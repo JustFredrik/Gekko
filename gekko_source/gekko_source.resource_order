@@ -8,6 +8,7 @@
     {"name":"Sprites","order":2,"path":"folders/Gekko UI/Internal/Sprites.yy",},
     {"name":"Util","order":3,"path":"folders/Gekko UI/Internal/Util.yy",},
     {"name":"Util","order":3,"path":"folders/Gekko UI/Util.yy",},
+    {"name":"OKLab","order":12,"path":"folders/OKLab.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"__scr_gekko_internal","order":4,"path":"scripts/__scr_gekko_internal/__scr_gekko_internal.yy",},

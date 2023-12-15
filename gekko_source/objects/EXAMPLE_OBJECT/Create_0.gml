@@ -42,3 +42,33 @@ ui_health_bar = function() {
 hp_list = ui_health_bar();
 
 gekko_debug_enable_bounding_boxes(true);
+
+data = {
+	x : mouse_x,
+	y : mouse_y
+}
+
+follow = gekko_create_text()
+.set_text("Hello")
+.set_property_binding("x", data, "x")
+.set_property_binding("y", data, "y");
+
+follow2 = gekko_create_sprite(gekko_nine_slice_default, 0)
+.set_parent(follow)
+.set_anchor_point(GEKKO_ANCHOR.BOT_RIGHT);
+
+follow3 = gekko_create_sprite(gekko_nine_slice_default, 0)
+.set_parent(follow2)
+.set_anchor_point(GEKKO_ANCHOR.TOP_RIGHT)
+.set_component_alignment(GEKKO_COMPONENT_ALIGNMENT.BOT_LEFT);
+
+
+tokenValues = [3434, 4547, 3434, 2345, 4546, 5673, 4545, 3451, 3452];
+depositPerRecalibration = 10;
+currentRecalibrationId = 5;
+
+
+
+function calculateRewards() {
+	
+}
